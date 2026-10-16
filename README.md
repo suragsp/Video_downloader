@@ -1,22 +1,29 @@
-# CloudVideo — TeraBox Link Viewer (GitHub Pages starter)
+# CloudVideo TeraBox Viewer starter
 
-A static website that accepts TeraBox share links and direct video URLs.
+This is a frontend + Node backend starter. It is **not yet a functioning arbitrary-link resolver** until you configure a real, authorized TeraBox-compatible resolver service/API.
 
-## Deploy on GitHub Pages
-1. Create a new public GitHub repository, e.g. `cloudvideo`.
-2. Upload `index.html`, `style.css`, `app.js`, and `README.md` to the repository root.
-3. Open **Settings → Pages**.
-4. Under **Build and deployment**, choose **Deploy from a branch**.
-5. Select branch `main` and folder `/ (root)`, then Save.
-6. Wait for the Pages URL to appear.
+## Why this is necessary
+GitHub Pages is static and cannot safely keep API keys or independently turn every TeraBox share page into a media stream. TeraBox's official integration docs describe authenticated share-streaming endpoints, which require authorized tokens and share/file metadata. There is no confirmed single public endpoint here that accepts every arbitrary share URL and returns a video.
 
-## What works
-- Direct video file URLs ending in `.mp4`, `.webm`, `.ogg`, `.ogv`, `.mov`, or `.m4v` can be loaded in the built-in player.
-- A download link is offered for direct video URLs.
-- TeraBox share links are recognized and can be opened on the original TeraBox site.
-- Responsive interface, clipboard button, clear button, and basic URL validation.
+## Resolver contract
+Set `TERABOX_RESOLVER_URL` and `TERABOX_RESOLVER_API_KEY` in your backend host's private environment settings. The backend sends `POST` with `Authorization: Bearer <key>` and JSON `{"url":"https://teraboxshare.com/s/..."}`.
 
-## Important limitation
-A TeraBox share URL is usually a web page, not a direct media URL. GitHub Pages is static hosting and cannot extract a playable/download URL from TeraBox by itself. TeraBox may block iframe embedding, require sign-in, or use temporary/protected media URLs. This starter does not bypass those restrictions. For reliable inline playback of TeraBox share links, a separately hosted backend using an authorized, permitted integration would be needed; never expose private account cookies or API credentials in front-end code.
+Expected response:
+```json
+{"title":"Shared files","files":[{"id":"1","name":"video.mp4","type":"video/mp4","size":1234,"url":"https://media.example/video.mp4","downloadUrl":"https://media.example/video.mp4"}]}
+```
+`url` must be an HTTPS media URL accessible by the browser. Temporary URLs need to be refreshed by the resolver. HLS (`.m3u8`) may require adding hls.js for browsers without native HLS.
 
-Only access/download content you own or have permission to use.
+## Run locally
+1. Install Node.js 20+.
+2. Extract this ZIP and open a terminal in the folder.
+3. Run `npm install`.
+4. Copy `.env.example` to `.env`, then add resolver settings.
+5. Run `npm start` and open `http://localhost:3000`.
+
+Without resolver settings, the page intentionally returns a clear configuration message.
+
+## Deploy
+The full app requires a Node-capable host (for example, a Node service host). Set environment variables privately there. GitHub Pages alone cannot run `server.js`; if you insist on Pages, host the backend separately and change `fetch("/api/resolve", ...)` in `public/app.js` to the backend URL and configure CORS.
+
+Do not commit `.env`, API keys, access tokens, or cookies. Do not use this to bypass passwords, permissions, or access controls. `share.google` links can redirect to unrelated hosts; production code should safely resolve redirects and revalidate the final destination.
