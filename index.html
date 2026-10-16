@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A simple video link viewer for direct video URLs and TeraBox share links.">
+  <title>CloudVideo — Watch or Download</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="CloudVideo home"><span class="brand-mark">▶</span> CloudVideo</a>
+      <span class="top-note">Video link viewer</span>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow"><span class="dot"></span> YOUR VIDEO, ONE PLACE</div>
+      <h1>Paste a link.<br><span>Press play.</span></h1>
+      <p class="subtitle">Open a TeraBox share link or play a direct video URL, with download options when the source allows it.</p>
+
+      <form id="linkForm" class="link-form">
+        <label for="videoUrl">Video or TeraBox share link</label>
+        <div class="input-row">
+          <input id="videoUrl" type="url" placeholder="https://terabox.com/s/..." autocomplete="url" required>
+          <button class="primary" type="submit">Load link <span aria-hidden="true">↗</span></button>
+        </div>
+        <p class="hint">Works best with direct .mp4, .webm, or .ogg URLs. TeraBox share links may require opening on TeraBox.</p>
+      </form>
+    </section>
+
+    <section id="result" class="result hidden" aria-live="polite">
+      <div class="result-head">
+        <div>
+          <div class="eyebrow">LINK READY</div>
+          <h2 id="resultTitle">Your video</h2>
+        </div>
+        <button id="clearBtn" class="icon-btn" type="button" title="Clear link" aria-label="Clear link">×</button>
+      </div>
+
+      <div id="playerWrap" class="player-wrap hidden">
+        <video id="player" controls playsinline preload="metadata"></video>
+      </div>
+
+      <div id="teraboxNotice" class="notice hidden">
+        <div class="notice-icon">ⓘ</div>
+        <div>
+          <strong>This looks like a TeraBox share link</strong>
+          <p>TeraBox share pages usually aren't direct video files. Try the embedded view below; if it is blocked, open the link on TeraBox. This page cannot bypass sign-in, permissions, ads, or TeraBox protections.</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a id="watchBtn" class="primary action-link" href="#" target="_blank" rel="noopener noreferrer">Watch / open link <span>↗</span></a>
+        <a id="downloadBtn" class="secondary action-link hidden" href="#" download>Download video <span>↓</span></a>
+        <button id="copyBtn" class="secondary" type="button">Copy link</button>
+      </div>
+      <p id="status" class="status"></p>
+    </section>
+
+    <section class="how">
+      <div class="section-title"><span>01</span><h3>How it works</h3></div>
+      <div class="steps">
+        <article><span class="step-icon">↗</span><h4>Paste a link</h4><p>Use a TeraBox share link or a direct video file URL.</p></article>
+        <article><span class="step-icon">▶</span><h4>Watch online</h4><p>Direct video URLs can play in the built-in player. Share pages may open on their original site.</p></article>
+        <article><span class="step-icon">↓</span><h4>Download when available</h4><p>Direct file links can be downloaded if the host permits it and its CORS / browser rules allow it.</p></article>
+      </div>
+    </section>
+
+    <footer>
+      <p>Use only videos you own or have permission to access and download. CloudVideo does not host video files.</p>
+      <span>Static demo · GitHub Pages ready</span>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
