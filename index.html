@@ -1,77 +1,171 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A simple video link viewer for direct video URLs and TeraBox share links.">
-  <title>CloudVideo — Watch or Download</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOX-STREAM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #4caf50;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group input[type="text"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 300px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px #2e7d32;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #388e3c;
+        }
+
+        button:active {
+            box-shadow: 0 2px #1b5e20;
+            transform: translateY(2px);
+        }
+
+        .video-container {
+            max-width: 100%; /* Adjust the width to fit your design */
+            margin: 20px auto; /* Center the video player horizontally */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            display: none; /* Initially hidden */
+        }
+        
+        video {
+            width: 100%; /* Full width of the container */
+            height: auto; /* Height is set automatically to maintain aspect ratio */
+            max-height: 80vh; /* Optional: set a max-height to ensure it fits within the viewport */
+            border-radius: 5px;
+        }        
+
+        /* Other styles remain the same */
+    </style>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <a class="brand" href="#" aria-label="CloudVideo home"><span class="brand-mark">▶</span> CloudVideo</a>
-      <span class="top-note">Video link viewer</span>
-    </header>
+    <div class="header">
+        <h1>BOX-STREAM</h1>
+    </div>
 
-    <section class="hero">
-      <div class="eyebrow"><span class="dot"></span> YOUR VIDEO, ONE PLACE</div>
-      <h1>Paste a link.<br><span>Press play.</span></h1>
-      <p class="subtitle">Open a TeraBox share link or play a direct video URL, with download options when the source allows it.</p>
+    <div class="input-group">
+        <input type="text" id="urlInput" placeholder="Enter URL here">
+        <button id="fetchButton">Fetch Video Link</button>
+    </div>
 
-      <form id="linkForm" class="link-form">
-        <label for="videoUrl">Video or TeraBox share link</label>
-        <div class="input-row">
-          <input id="videoUrl" type="url" placeholder="https://terabox.com/s/..." autocomplete="url" required>
-          <button class="primary" type="submit">Load link <span aria-hidden="true">↗</span></button>
-        </div>
-        <p class="hint">Works best with direct .mp4, .webm, or .ogg URLs. TeraBox share links may require opening on TeraBox.</p>
-      </form>
-    </section>
+    <div class="video-container" id="videoContainer">
+        <video controls id="videoPlayer">
+            <source src="" type="video/mp4">Your browser does not support the video tag.
+        </video>
+    </div>
 
-    <section id="result" class="result hidden" aria-live="polite">
-      <div class="result-head">
-        <div>
-          <div class="eyebrow">LINK READY</div>
-          <h2 id="resultTitle">Your video</h2>
-        </div>
-        <button id="clearBtn" class="icon-btn" type="button" title="Clear link" aria-label="Clear link">×</button>
-      </div>
+    <button id="playButton" style="display: none;">Play Video</button>
+    <button id="downloadButton" style="display: none;">Download Video</button>
+    <script>
+        document.getElementById('fetchButton').addEventListener('click', async () => {
+            const urlInput = document.getElementById('urlInput').value;
+            if (!urlInput) {
+                alert('Please enter a URL.');
+                return;
+            }
 
-      <div id="playerWrap" class="player-wrap hidden">
-        <video id="player" controls playsinline preload="metadata"></video>
-      </div>
+            try {
+                const response = await fetch(`https://boxstream.thejuniortest.workers.dev/?url=${encodeURIComponent(urlInput)}`);
+                const data = await response.json();
 
-      <div id="teraboxNotice" class="notice hidden">
-        <div class="notice-icon">ⓘ</div>
-        <div>
-          <strong>This looks like a TeraBox share link</strong>
-          <p>TeraBox share pages usually aren't direct video files. Try the embedded view below; if it is blocked, open the link on TeraBox. This page cannot bypass sign-in, permissions, ads, or TeraBox protections.</p>
-        </div>
-      </div>
+                if (data.ok && data.downloadLink) {
+                    const videoContainer = document.getElementById('videoContainer');
+                    const videoPlayer = document.getElementById('videoPlayer');
+                    const playButton = document.getElementById('playButton');
+                    const downloadButton = document.getElementById('downloadButton');
 
-      <div class="actions">
-        <a id="watchBtn" class="primary action-link" href="#" target="_blank" rel="noopener noreferrer">Watch / open link <span>↗</span></a>
-        <a id="downloadBtn" class="secondary action-link hidden" href="#" download>Download video <span>↓</span></a>
-        <button id="copyBtn" class="secondary" type="button">Copy link</button>
-      </div>
-      <p id="status" class="status"></p>
-    </section>
+                    videoPlayer.src = data.downloadLink;
+                    videoContainer.style.display = 'none'; // Keep the video container hidden until "Play" is clicked
+            
+                    // Get the video's metadata to adjust container size
+                    videoPlayer.onloadedmetadata = function() {
+                        const aspectRatio = videoPlayer.videoWidth / videoPlayer.videoHeight;
+                        const maxWidth = window.innerWidth * 0.9; // Set a maximum width for the container
+                        const maxHeight = window.innerHeight * 0.8; // Set a maximum height for the container
 
-    <section class="how">
-      <div class="section-title"><span>01</span><h3>How it works</h3></div>
-      <div class="steps">
-        <article><span class="step-icon">↗</span><h4>Paste a link</h4><p>Use a TeraBox share link or a direct video file URL.</p></article>
-        <article><span class="step-icon">▶</span><h4>Watch online</h4><p>Direct video URLs can play in the built-in player. Share pages may open on their original site.</p></article>
-        <article><span class="step-icon">↓</span><h4>Download when available</h4><p>Direct file links can be downloaded if the host permits it and its CORS / browser rules allow it.</p></article>
-      </div>
-    </section>
+                        let width = maxWidth;
+                        let height = maxWidth / aspectRatio;
 
-    <footer>
-      <p>Use only videos you own or have permission to access and download. CloudVideo does not host video files.</p>
-      <span>Static demo · GitHub Pages ready</span>
-    </footer>
-  </main>
-  <script src="app.js"></script>
+                        // Check if the calculated height exceeds the maximum height
+                        if (height > maxHeight) {
+                            height = maxHeight;
+                            width = maxHeight * aspectRatio;
+                        }
+
+                        // Apply the calculated width and height to the video container
+                        videoContainer.style.width = `${width}px`;
+                        videoContainer.style.height = `${height}px`;
+                    };
+
+                    playButton.style.display = 'inline'; // Show the "Play" button
+                    downloadButton.style.display = 'inline'; // Show the "Download" button
+                } else {
+                    alert('Failed to fetch video link.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error fetching video link.');
+            }
+        });
+
+        document.getElementById('playButton').addEventListener('click', () => {
+            const videoContainer = document.getElementById('videoContainer');
+            videoContainer.style.display = 'block'; // Show the video container
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.load();
+            videoPlayer.play();
+        });        
+
+        document.getElementById('downloadButton').addEventListener('click', () => {
+            const videoPlayer = document.getElementById('videoPlayer');
+            window.open(videoPlayer.src, '_blank'); // Open the video URL in a new tab to start the download
+        });
+    </script>
 </body>
 </html>
